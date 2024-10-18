@@ -1,0 +1,169 @@
+SQL Task: Create a Simple E-commerce System
+
+Objective:
+Design and implement a database structure to manage a simple e-commerce system. The system will consist of three tables: customers, orders, and products, each serving a distinct role in the management of customer data, product information, and order tracking.
+
+
+Table Structure:
+
+-- Create Customers Table
+CREATE TABLE customers (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) UNIQUE,
+    address VARCHAR(150)
+);
+
+-- Insert Data into Customers Table
+INSERT INTO customers (name, email, address) 
+VALUES
+    ('Sneha', 'sneha@gmail.com', '123 Temple st, Erode'),
+    ('Nandhini', 'nandhini@gmail.com', '456 main st, Tiruppur'),
+    ('Monika', 'monika@gmail.com', '789 Palani st, Coimbatore'),
+    ('Sharmila', 'sharmila@gmail.com', '104 old st, Dindigul'),
+    ('Saran', 'saran@gmail.com', '157 shanthi st, Tiruppur');
+
+-- Select all data from Customers Table
+SELECT * FROM customers;
+
+
+-- Create Orders Table
+CREATE TABLE orders (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    customer_id INT,
+    order_date DATE,
+    total_amount DECIMAL(10, 2),
+    FOREIGN KEY (customer_id) REFERENCES customers(id)
+);
+
+-- Insert Data into Orders Table
+INSERT INTO orders (customer_id, order_date, total_amount)
+VALUES
+    (3, '2024-09-15', 350.00),
+    (1, '2024-10-03', 100.00),
+    (2, '2024-10-10', 140.00),
+    (4, '2024-09-10', 170.00),
+    (1, '2024-10-08', 60.00);
+
+-- Select all data from Orders Table
+SELECT * FROM orders;
+
+
+-- Create Products Table
+CREATE TABLE products (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100),
+    price DECIMAL(10, 2),
+    description TEXT
+);
+
+-- Insert Data into Products Table
+INSERT INTO products (name, price, description)
+VALUES
+    ('Product A', 80.00, 'Description for Product A'),
+    ('Product B', 100.00, 'Description for Product B'),
+    ('Product C', 50.00, 'Description for Product C');
+
+-- Select all data from Products Table
+SELECT * FROM products;
+
+
+-- Queries
+
+-- 1. Retrieve all customers who have placed an order in the last 30 days.
+
+SELECT DISTINCT customers.name 
+FROM customers 
+JOIN orders ON customers.id = orders.customer_id
+WHERE orders.order_date >= CURDATE() - INTERVAL 30 DAY;
+
+-- 2. Get the total amount of all orders placed by each customer.
+
+SELECT customers.name, SUM(orders.total_amount) AS total_amount 
+FROM customers
+JOIN orders ON customers.id = orders.customer_id
+GROUP BY customers.name;
+
+-- 3. Update the price of Product C to 45.00.
+
+UPDATE products 
+SET price = 45.00
+WHERE id = 3;
+
+-- Alternative
+
+UPDATE products 
+SET price = 45.00
+WHERE name = 'Product C';
+
+
+-- Verify the update
+SELECT * FROM products;
+
+-- 4. Add a new column 'discount' to the products table.
+
+ALTER TABLE products ADD COLUMN discount DECIMAL(5, 2) DEFAULT 0.00;
+
+-- Verify the new column
+
+SELECT * FROM products;
+
+-- 5. Retrieve the top 3 products with the highest price.
+
+SELECT name, price 
+FROM products 
+ORDER BY price DESC 
+LIMIT 3;
+
+-- 6. Get the names of customers who have ordered Product A.
+
+SELECT DISTINCT customers.name
+FROM customers
+JOIN orders ON customers.id = orders.customer_id
+JOIN order_items ON orders.id = order_items.order_id
+JOIN products ON order_items.product_id = products.id
+WHERE products.name = 'Product A';
+
+-- 7. Join the orders and customers tables to retrieve the customer's name and order date for each order.
+
+SELECT customers.name, orders.order_date 
+FROM customers
+JOIN orders ON customers.id = orders.customer_id;
+
+-- 8. Retrieve the orders with a total amount greater than 150.00.
+
+SELECT * FROM orders WHERE total_amount > 150;
+
+-- 9. Normalize the database by creating a separate table for order items and updating the orders table to reference the order_items table.
+
+CREATE TABLE order_items (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    order_id INT,
+    product_id INT,
+    quantity INT,
+    FOREIGN KEY (order_id) REFERENCES orders(id),
+    FOREIGN KEY (product_id) REFERENCES products(id)
+);
+
+-- Insert data into order_items table
+INSERT INTO order_items (order_id, product_id, quantity)
+VALUES
+    (1, 1, 1),
+    (2, 2, 2),
+    (3, 2, 1),
+    (4, 1, 1);
+
+-- Verify the insertion
+SELECT * FROM order_items;
+
+-- 10. Retrieve the average total of all orders.
+
+SELECT AVG(total_amount) FROM orders;
+
+
+
+
+
+
+
+
